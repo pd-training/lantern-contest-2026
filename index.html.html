@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mid-Autumn AI Lantern Contest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1440;
+    --ink-deep:#070C2C;
+    --card:#141C4E;
+    --card-line:#30397A;
+    --amber:#F5C542;
+    --persimmon:#FF9D4D;
+    --cream:#F6EFDD;
+    --cream-dim:#B9C0E8;
+    --jade:#5B9083;
+    --danger:#FF7A5C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle 260px at 82% 10%, rgba(245,197,66,0.28), transparent 70%),
+      radial-gradient(1.5px 1.5px at 12% 18%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 27% 42%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 41% 12%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 63% 30%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 78% 55%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 92% 20%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 8% 70%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 55% 80%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 35% 90%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 88% 85%, #fff 100%, transparent),
+      linear-gradient(180deg, var(--ink-deep), var(--ink) 55%, var(--ink-deep));
+    background-attachment:fixed;
+    color:var(--cream);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px;position:relative;z-index:1;}
+  .lantern-field{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+  .floating-lantern{position:absolute;bottom:-140px;width:30px;animation:lanternRise linear infinite;}
+  .floating-lantern::before{
+    content:'';position:absolute;left:50%;top:-16px;width:1px;height:16px;
+    background:rgba(246,239,221,0.35);transform:translateX(-50%);
+  }
+  .floating-lantern .cap{width:100%;height:6px;background:#5A3E16;border-radius:3px 3px 1px 1px;}
+  .floating-lantern .body{
+    width:100%;height:34px;border-radius:15px;margin-top:-1px;
+    background:radial-gradient(circle at 32% 28%, #FFEFC2, var(--amber) 55%, var(--persimmon) 100%);
+    box-shadow:0 0 16px 4px rgba(245,197,66,0.5), inset -3px 0 6px rgba(0,0,0,0.15);
+    position:relative;
+  }
+  .floating-lantern .body::after{
+    content:'';position:absolute;top:0;bottom:0;left:47%;width:1px;background:rgba(90,62,22,0.35);
+  }
+  .floating-lantern .base{width:100%;height:5px;background:#5A3E16;border-radius:1px 1px 3px 3px;}
+  .floating-lantern .tassel{width:2px;height:12px;background:#B97423;margin:0 auto;}
+  @keyframes lanternRise{
+    0%{transform:translateY(0) rotate(-2deg);opacity:0;}
+    8%{opacity:0.85;}
+    50%{transform:translateY(-52vh) rotate(2deg);}
+    92%{opacity:0.85;}
+    100%{transform:translateY(-108vh) rotate(-2deg);opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .floating-lantern{animation:none;display:none;}
+  }
+  header.top{
+    display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;
+    gap:14px;margin-bottom:8px;padding:38px 20px 34px;position:relative;overflow:hidden;
+    border-radius:20px;border:1px solid var(--card-line);
+    background:radial-gradient(circle 320px at 50% -30%, rgba(245,197,66,0.22), transparent 70%), var(--card);
+  }
+  .brand{display:flex;align-items:center;gap:14px;flex-direction:column;}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;background:var(--cream);color:var(--ink-deep);
+    padding:8px 18px;border-radius:999px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:0.95rem;
+  }
+  .moon{
+    width:72px;height:72px;border-radius:50%;flex-shrink:0;
+    background:radial-gradient(circle at 35% 30%, #FFFCF2, var(--amber) 55%, #C98A1F 100%);
+    box-shadow:0 0 50px 10px rgba(245,197,66,0.45);
+    margin-top:2px;
+  }
+  h1{
+    font-family:'Fredoka',sans-serif;font-weight:700;font-size:2.6rem;margin:4px 0 0;letter-spacing:0.5px;
+    color:var(--amber);text-shadow:0 3px 0 rgba(0,0,0,0.35);line-height:1;
+  }
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-dim);margin:0 0 2px;}
+  nav.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:28px 0 26px;}
+  nav.tabs button{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:0.9rem;
+    background:transparent;border:1.5px solid var(--card-line);color:var(--cream-dim);
+    padding:9px 18px;border-radius:999px;cursor:pointer;transition:all .18s ease;
+  }
+  nav.tabs button:hover{border-color:var(--amber);color:var(--cream);}
+  nav.tabs button.active{background:var(--amber);border-color:var(--amber);color:var(--ink-deep);font-weight:700;}
+  .banner{
+    border:1px solid var(--card-line);background:var(--card);border-radius:12px;
+    padding:14px 18px;font-size:0.88rem;color:var(--cream-dim);margin-bottom:26px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .banner .dot{width:8px;height:8px;border-radius:50%;background:var(--jade);flex-shrink:0;box-shadow:0 0 8px var(--jade);}
+  .banner.warn .dot{background:var(--persimmon);box-shadow:0 0 8px var(--persimmon);}
+  .card{background:var(--card);border:1px solid var(--card-line);border-radius:16px;padding:28px;margin-bottom:22px;}
+  label{display:block;font-size:0.82rem;color:var(--cream-dim);margin:0 0 6px;font-weight:500;}
+  input[type=text], input[type=email], textarea{
+    width:100%;background:var(--ink-deep);border:1px solid var(--card-line);border-radius:9px;
+    color:var(--cream);padding:11px 13px;font-family:'Work Sans',sans-serif;font-size:0.94rem;
+    margin-bottom:18px;transition:border-color .15s;
+  }
+  input:focus, textarea:focus{outline:none;border-color:var(--amber);}
+  textarea{resize:vertical;min-height:90px;}
+  .counter{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--cream-dim);margin:-12px 0 18px;text-align:right;}
+  .counter.over{color:var(--danger);}
+  .filebox{
+    border:1.5px dashed var(--card-line);border-radius:10px;padding:20px;text-align:center;
+    margin-bottom:18px;cursor:pointer;transition:border-color .15s;position:relative;
+  }
+  .filebox:hover{border-color:var(--amber);}
+  .filebox input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+  .filebox .hint{font-size:0.8rem;color:var(--cream-dim);}
+  .preview{max-width:100%;max-height:220px;border-radius:8px;margin-top:12px;display:none;}
+  button.primary{
+    background:linear-gradient(135deg,var(--amber),var(--persimmon));border:none;color:var(--ink-deep);
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:0.94rem;padding:12px 26px;border-radius:999px;cursor:pointer;transition:filter .15s;
+  }
+  button.primary:hover{filter:brightness(1.08);}
+  button.primary:disabled{opacity:0.45;cursor:not-allowed;}
+  button.ghost{background:transparent;border:1px solid var(--card-line);color:var(--cream-dim);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:0.82rem;}
+  button.ghost:hover{border-color:var(--amber);color:var(--cream);}
+  .msg{padding:12px 16px;border-radius:9px;font-size:0.86rem;margin-bottom:16px;display:none;}
+  .msg.ok{background:rgba(91,144,131,0.18);border:1px solid var(--jade);color:#BFE3D8;}
+  .msg.err{background:rgba(217,104,60,0.18);border:1px solid var(--persimmon);color:#F4C9B4;}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
+  .lantern{
+    background:var(--card);border:1px solid var(--card-line);border-radius:14px;overflow:hidden;
+    display:flex;flex-direction:column;transition:transform .15s, border-color .15s;
+  }
+  .lantern:hover{border-color:var(--amber);transform:translateY(-2px);}
+  .lantern img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+  .lantern .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .lantern .name{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--amber);font-size:1.02rem;}
+  .lantern .writeup{font-size:0.82rem;color:var(--cream-dim);line-height:1.45;flex:1;}
+  .lantern .voted{font-size:0.78rem;color:var(--jade);font-weight:600;}
+  .voter-gate{max-width:420px;}
+  .results-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+  .results-row .rname{width:150px;flex-shrink:0;font-size:0.85rem;font-family:'Fredoka',sans-serif;color:var(--cream);}
+  .results-row .barwrap{flex:1;background:var(--ink-deep);border-radius:999px;height:16px;overflow:hidden;border:1px solid var(--card-line);}
+  .results-row .bar{height:100%;background:linear-gradient(90deg,var(--persimmon),var(--amber));box-shadow:0 0 10px rgba(232,163,61,0.5);}
+  .results-row .rcount{width:34px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--cream-dim);}
+  table.admin-t{width:100%;border-collapse:collapse;font-size:0.82rem;}
+  table.admin-t th{text-align:left;color:var(--cream-dim);font-weight:500;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;padding:8px 10px;border-bottom:1px solid var(--card-line);}
+  table.admin-t td{padding:9px 10px;border-bottom:1px solid var(--card-line);vertical-align:middle;}
+  table.admin-t img.thumb{width:42px;height:42px;object-fit:cover;border-radius:6px;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.7rem;font-weight:600;}
+  .pill.on{background:rgba(91,144,131,0.22);color:#BFE3D8;}
+  .pill.off{background:rgba(255,255,255,0.06);color:var(--cream-dim);}
+  .phase-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+  .empty{text-align:center;padding:40px 20px;color:var(--cream-dim);font-size:0.9rem;}
+  .small{font-size:0.76rem;color:var(--cream-dim);}
+  .footer-note{text-align:center;font-size:0.72rem;color:var(--cream-dim);opacity:0.6;margin-top:40px;}
+  ::placeholder{color:#5C6690;}
+</style>
+</head>
+<body>
+<div class="lantern-field" aria-hidden="true">
+  <div class="floating-lantern" style="left:4%;width:22px;animation-duration:26s;animation-delay:-2s;">
+    <div class="cap"></div><div class="body"></div><div class="base"></div><div class="tassel"></div>
+  </div>
+  <div class="floating-lantern" style="left:14%;width:30px;animation-duration:32s;animation-delay:-14s;">
+    <div class="cap"></div><div class="body"></div><div class="base"></div><div class="tassel"></div>
+  </div>
+  <div class="floating-lantern" style="left:27%;width:18px;animation-duration:22s;animation-delay:-8s;">
+    <div class="cap"></div><div class="body"></div><div class="base"></div><div class="tassel"></div>
+  </div>
+  <div class="floating-lantern" style="left:48%;width:26px;animation-duration:29s;animation-delay:-20s;">
+    <div class="cap"></div><div class="body"></div><div class="base"></div><div class="tassel"></div>
+  </div>
+  <div class="floating-lantern" style="left:63%;width:20px;animation-duration:24s;animation-delay:-5s;">
+    <div class="cap"></div><div class="body"></div><div class="base"></div><div class="tassel"></div>
+  </div>
+  <div class="floating-lantern" style="left:78%;width:32px;animation-duration:34s;animation-delay:-18s;">
+    <div class="cap"></div><div class="body"></div><div class="base"></div><div class="tassel"></div>
+  </div>
+  <div class="floating-lantern" style="left:90%;width:22px;animation-duration:27s;animation-delay:-11s;">
+    <div class="cap"></div><div class="body"></div><div class="base"></div><div class="tassel"></div>
+  </div>
+</div>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="moon"></div>
+      <span class="badge">✨ AI Lantern Design</span>
+      <h1>CONTEST</h1>
+      <p class="eyebrow">🏮 What Does Mid-Autumn Mean to You? 🏮</p>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button id="tab-submit" class="active">Submit Entry</button>
+    <button id="tab-vote">Vote</button>
+    <button id="tab-admin">Admin</button>
+  </nav>
+
+  <div id="banner" class="banner"><span class="dot"></span><span id="banner-text">Loading status…</span></div>
+
+  <div id="view-submit"></div>
+  <div id="view-vote" style="display:none;"></div>
+  <div id="view-admin" style="display:none;"></div>
+
+  <p class="footer-note">“What Does Mid-Autumn Mean to You?” · Submission deadline 20 Sep 2026</p>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+// ====== SUPABASE SETUP — replace with your own project's values ======
+const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+// ========================================================================
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Drop-in replacements for the old window.storage API, backed by a single
+// key/value table (see the setup guide for the exact SQL to create it).
+async function storageGet(key){
+  const { data, error } = await sb.from('kv_store').select('value').eq('key', key).maybeSingle();
+  if(error || !data) return null;
+  return { key, value: data.value };
+}
+async function storageSet(key, value){
+  const { error } = await sb.from('kv_store').upsert({ key, value, updated_at: new Date().toISOString() });
+  return error ? null : { key, value };
+}
+async function storageList(prefix){
+  const { data, error } = await sb.from('kv_store').select('key').like('key', prefix + '%');
+  if(error) return null;
+  return { keys: (data || []).map(r => r.key) };
+}
+</script>
+<script>
+const DEADLINE = new Date('2026-09-20T23:59:59+08:00');
+const ADMIN_PASSCODE = 'MIDAUTUMN2026'; // share only with contest organisers
+
+let phase = 'submission'; // submission | voting | results
+let adminAuthed = false;
+let voterIdentity = null; // {name, email} kept in memory only for this session
+
+const el = (id) => document.getElementById(id);
+
+function normKey(str){
+  return str.trim().toLowerCase().replace(/[^a-z0-9@._-]/g,'_');
+}
+
+function wordCount(str){
+  return str.trim().length ? str.trim().split(/\s+/).length : 0;
+}
+
+// ---------- PHASE ----------
+async function loadPhase(){
+  try{
+    const r = await storageGet('phase');
+    phase = r ? r.value : 'submission';
+  }catch(e){ phase = 'submission'; }
+  renderBanner();
+}
+
+function renderBanner(){
+  const b = el('banner'), t = el('banner-text');
+  const past = new Date() > DEADLINE;
+  if(phase === 'submission'){
+    b.className = 'banner' + (past ? ' warn' : '');
+    t.textContent = past
+      ? 'Submissions are closed — the 20 Sep 2026 deadline has passed.'
+      : 'Submissions are open. Voting will open on the event day.';
+  } else if(phase === 'voting'){
+    b.className = 'banner';
+    t.textContent = 'Voting is now open — cast your vote for your favourite lantern!';
+  } else {
+    b.className = 'banner';
+    t.textContent = 'Voting has closed — results are in!';
+  }
+}
+
+// ---------- TABS ----------
+function setTab(name){
+  ['submit','vote','admin'].forEach(n=>{
+    el('tab-'+n).classList.toggle('active', n===name);
+    el('view-'+n).style.display = n===name ? '' : 'none';
+  });
+  if(name==='submit') renderSubmit();
+  if(name==='vote') renderVote();
+  if(name==='admin') renderAdmin();
+}
+el('tab-submit').onclick = ()=>setTab('submit');
+el('tab-vote').onclick = ()=>setTab('vote');
+el('tab-admin').onclick = ()=>setTab('admin');
+
+// ---------- SUBMIT VIEW ----------
+function renderSubmit(){
+  const past = new Date() > DEADLINE;
+  const v = el('view-submit');
+  if(past){
+    v.innerHTML = `<div class="card"><p class="empty">The submission window has closed. Thank you to everyone who took part! 🏮</p></div>`;
+    return;
+  }
+  v.innerHTML = `
+    <div class="card">
+      <p class="small" style="margin-bottom:20px;">Your entry stays private — only the organisers can see it until it's shortlisted for anonymous voting. You may resubmit any time before the deadline; your latest version will replace the earlier one.</p>
+      <div id="submit-msg" class="msg"></div>
+      <label for="s-name">Rep full name</label>
+      <input type="text" id="s-name" placeholder="e.g. Tan Wei Ling">
+      <label for="s-email">Phillip email</label>
+      <input type="email" id="s-email" placeholder="name@phillip.com.sg">
+      <label for="s-write">Short write-up — what does Mid-Autumn mean to you? (max 50 words)</label>
+      <textarea id="s-write" placeholder="Tell us the story behind your lantern…"></textarea>
+      <div class="counter" id="s-counter">0 / 50 words</div>
+      <label>Completed artwork (JPG or PNG, AI-generated)</label>
+      <div class="filebox">
+        <input type="file" id="s-file" accept="image/jpeg,image/png">
+        <div class="hint" id="s-file-hint">Click or drop your JPG/PNG here (max ~3MB)</div>
+      </div>
+      <img class="preview" id="s-preview">
+      <div><button class="primary" id="s-submit">Submit Entry</button></div>
+    </div>
+  `;
+  const writeEl = el('s-write'), counter = el('s-counter');
+  writeEl.addEventListener('input', ()=>{
+    const wc = wordCount(writeEl.value);
+    counter.textContent = wc + ' / 50 words';
+    counter.classList.toggle('over', wc > 50);
+  });
+
+  let imageDataUrl = null;
+  el('s-file').addEventListener('change', (e)=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    if(!['image/jpeg','image/png'].includes(f.type)){
+      el('s-file-hint').textContent = 'Please choose a JPG or PNG file.';
+      return;
+    }
+    if(f.size > 3.2*1024*1024){
+      el('s-file-hint').textContent = 'File is too large — please keep it under ~3MB.';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      imageDataUrl = reader.result;
+      el('s-preview').src = imageDataUrl;
+      el('s-preview').style.display = 'block';
+      el('s-file-hint').textContent = f.name + ' selected';
+    };
+    reader.readAsDataURL(f);
+  });
+
+  el('s-submit').onclick = async ()=>{
+    const name = el('s-name').value.trim();
+    const email = el('s-email').value.trim();
+    const writeup = el('s-write').value.trim();
+    const msg = el('submit-msg');
+    msg.style.display='none';
+
+    if(!name || !email || !writeup || !imageDataUrl){
+      showMsg(msg,'err','Please fill in every field and attach your artwork before submitting.');
+      return;
+    }
+    if(!/^\S+@\S+\.\S+$/.test(email)){
+      showMsg(msg,'err','Please enter a valid email address.');
+      return;
+    }
+    if(wordCount(writeup) > 50){
+      showMsg(msg,'err','Your write-up is over the 50-word limit — please trim it down.');
+      return;
+    }
+    el('s-submit').disabled = true;
+    el('s-submit').textContent = 'Submitting…';
+    try{
+      const id = normKey(email);
+      const entry = {
+        id, name, email, writeup,
+        image: imageDataUrl,
+        timestamp: new Date().toISOString(),
+        shortlisted: false,
+        pseudonym: null
+      };
+      const res = await storageSet('submissions:'+id, JSON.stringify(entry));
+      if(res){
+        showMsg(msg,'ok','Entry submitted! You can resubmit anytime before 20 Sep 2026 to replace it.');
+      } else {
+        showMsg(msg,'err','Something went wrong saving your entry. Please try again.');
+      }
+    }catch(e){
+      showMsg(msg,'err','Something went wrong saving your entry. Please try again.');
+    }
+    el('s-submit').disabled = false;
+    el('s-submit').textContent = 'Submit Entry';
+  };
+}
+
+function showMsg(node, kind, text){
+  node.className = 'msg ' + kind;
+  node.textContent = text;
+  node.style.display = 'block';
+}
+
+// ---------- VOTE VIEW ----------
+async function fetchShortlisted(){
+  const list = await storageList('submissions:');
+  if(!list || !list.keys) return [];
+  const entries = [];
+  for(const k of list.keys){
+    try{
+      const r = await storageGet(k);
+      if(r && r.value){
+        const obj = JSON.parse(r.value);
+        if(obj.shortlisted) entries.push(obj);
+      }
+    }catch(e){}
+  }
+  return entries;
+}
+
+async function fetchAllSubmissions(){
+  const list = await storageList('submissions:');
+  if(!list || !list.keys) return [];
+  const entries = [];
+  for(const k of list.keys){
+    try{
+      const r = await storageGet(k);
+      if(r && r.value) entries.push(JSON.parse(r.value));
+    }catch(e){}
+  }
+  return entries;
+}
+
+async function fetchVotes(){
+  const list = await storageList('votes:');
+  if(!list || !list.keys) return [];
+  const votes = [];
+  for(const k of list.keys){
+    try{
+      const r = await storageGet(k);
+      if(r && r.value) votes.push(JSON.parse(r.value));
+    }catch(e){}
+  }
+  return votes;
+}
+
+async function renderVote(){
+  const v = el('view-vote');
+  if(phase === 'submission'){
+    v.innerHTML = `<div class="card"><p class="empty">Voting isn't open yet — check back during the event! 🏮</p></div>`;
+    return;
+  }
+  v.innerHTML = `<div class="card"><p class="empty">Loading lanterns…</p></div>`;
+  const entries = await fetchShortlisted();
+
+  if(phase === 'results'){
+    const votes = await fetchVotes();
+    const counts = {};
+    entries.forEach(e=>counts[e.id]=0);
+    votes.forEach(vt=>{ if(counts[vt.entryId] !== undefined) counts[vt.entryId]++; });
+    const ranked = entries.map(e=>({...e,count:counts[e.id]||0})).sort((a,b)=>b.count-a.count);
+    const max = Math.max(1, ...ranked.map(r=>r.count));
+    v.innerHTML = `
+      <div class="card">
+        <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;">Results 🏮</h2>
+        ${ranked.map(r=>`
+          <div class="results-row">
+            <div class="rname">${escapeHtml(r.pseudonym||'Unnamed')}</div>
+            <div class="barwrap"><div class="bar" style="width:${(r.count/max*100).toFixed(1)}%"></div></div>
+            <div class="rcount">${r.count}</div>
+          </div>
+        `).join('')}
+        ${ranked.length===0 ? '<p class="empty">No shortlisted entries yet.</p>' : ''}
+      </div>
+      <div class="gallery">
+        ${entries.map(e=>`
+          <div class="lantern">
+            <img src="${e.image}" alt="${escapeHtml(e.pseudonym||'Lantern entry')}">
+            <div class="body">
+              <div class="name">${escapeHtml(e.pseudonym||'Unnamed')}</div>
+              <div class="writeup">${escapeHtml(e.writeup)}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    return;
+  }
+
+  // voting phase — need voter identity first
+  if(!voterIdentity){
+    v.innerHTML = `
+      <div class="card voter-gate">
+        <p class="small" style="margin-bottom:18px;">Enter your name and email so we can make sure each person votes once. Your vote stays anonymous to other reps.</p>
+        <div id="vote-gate-msg" class="msg"></div>
+        <label for="v-name">Your name</label>
+        <input type="text" id="v-name" placeholder="e.g. Tan Wei Ling">
+        <label for="v-email">Your Phillip email</label>
+        <input type="email" id="v-email" placeholder="name@phillip.com.sg">
+        <button class="primary" id="v-continue">Continue to Voting</button>
+      </div>
+    `;
+    el('v-continue').onclick = ()=>{
+      const name = el('v-name').value.trim();
+      const email = el('v-email').value.trim();
+      const msg = el('vote-gate-msg');
+      if(!name || !email || !/^\S+@\S+\.\S+$/.test(email)){
+        showMsg(msg,'err','Please enter your name and a valid email.');
+        return;
+      }
+      voterIdentity = {name, email};
+      renderVote();
+    };
+    return;
+  }
+
+  const voterKey = normKey(voterIdentity.email);
+  let existingVote = null;
+  try{
+    const r = await storageGet('votes:'+voterKey);
+    if(r && r.value) existingVote = JSON.parse(r.value);
+  }catch(e){}
+
+  if(entries.length === 0){
+    v.innerHTML = `<div class="card"><p class="empty">No lanterns have been shortlisted for voting yet.</p></div>`;
+    return;
+  }
+
+  v.innerHTML = `
+    <div id="vote-msg" class="msg"></div>
+    <div class="gallery">
+      ${entries.map(e=>`
+        <div class="lantern">
+          <img src="${e.image}" alt="${escapeHtml(e.pseudonym||'Lantern entry')}">
+          <div class="body">
+            <div class="name">${escapeHtml(e.pseudonym||'Unnamed')}</div>
+            <div class="writeup">${escapeHtml(e.writeup)}</div>
+            ${existingVote
+              ? (existingVote.entryId === e.id
+                  ? `<div class="voted">✓ Your vote</div>`
+                  : `<button class="ghost" disabled>Vote cast</button>`)
+              : `<button class="primary vote-btn" data-id="${e.id}">Vote for this lantern</button>`
+            }
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  if(!existingVote){
+    document.querySelectorAll('.vote-btn').forEach(btn=>{
+      btn.onclick = async ()=>{
+        document.querySelectorAll('.vote-btn').forEach(b=>b.disabled = true);
+        const msg = el('vote-msg');
+        try{
+          const res = await storageSet('votes:'+voterKey, JSON.stringify({
+            voterKey, voterName: voterIdentity.name, entryId: btn.dataset.id, timestamp: new Date().toISOString()
+          }));
+          if(res){
+            showMsg(msg,'ok','Your vote has been recorded — thank you!');
+            renderVote();
+          } else {
+            showMsg(msg,'err','Could not record your vote. Please try again.');
+            document.querySelectorAll('.vote-btn').forEach(b=>b.disabled = false);
+          }
+        }catch(e){
+          showMsg(msg,'err','Could not record your vote. Please try again.');
+          document.querySelectorAll('.vote-btn').forEach(b=>b.disabled = false);
+        }
+      };
+    });
+  }
+}
+
+// ---------- ADMIN VIEW ----------
+const PSEUDONYM_ADJ = ['Amber','Jade','Silver','Crimson','Golden','Velvet','Twilight','Dawnlit','Moonlit','Ember'];
+const PSEUDONYM_NOUN = ['Lantern','Moonbeam','Harvest','Osmanthus','Mooncake','Rabbit','Lotus','Breeze','Reunion','Glow'];
+function suggestPseudonym(id){
+  let h = 0;
+  for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) >>> 0;
+  return PSEUDONYM_ADJ[h % PSEUDONYM_ADJ.length] + ' ' + PSEUDONYM_NOUN[(h>>3) % PSEUDONYM_NOUN.length];
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+function renderAdmin(){
+  const v = el('view-admin');
+  if(!adminAuthed){
+    v.innerHTML = `
+      <div class="card voter-gate">
+        <label for="a-pass">Admin passcode</label>
+        <input type="text" id="a-pass" placeholder="Enter passcode">
+        <div id="a-msg" class="msg"></div>
+        <button class="primary" id="a-login">Enter</button>
+      </div>
+    `;
+    el('a-login').onclick = ()=>{
+      if(el('a-pass').value === ADMIN_PASSCODE){
+        adminAuthed = true;
+        renderAdmin();
+      } else {
+        showMsg(el('a-msg'),'err','Incorrect passcode.');
+      }
+    };
+    return;
+  }
+
+  v.innerHTML = `<div class="card"><p class="empty">Loading submissions…</p></div>`;
+  loadAdminPanel();
+}
+
+async function loadAdminPanel(){
+  const v = el('view-admin');
+  const [entries, votes] = await Promise.all([fetchAllSubmissions(), fetchVotes()]);
+  const voteCounts = {};
+  votes.forEach(vt=>{ voteCounts[vt.entryId] = (voteCounts[vt.entryId]||0) + 1; });
+
+  v.innerHTML = `
+    <div class="card">
+      <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;font-size:1.1rem;">Event phase</h2>
+      <p class="small">Controls what reps see across the site.</p>
+      <div class="phase-btns">
+        <button class="ghost" data-phase="submission">Submission Open</button>
+        <button class="ghost" data-phase="voting">Voting Open</button>
+        <button class="ghost" data-phase="results">Show Results</button>
+      </div>
+      <p class="small">Current phase: <strong>${phase}</strong></p>
+    </div>
+    <div class="card">
+      <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;font-size:1.1rem;">Submissions (${entries.length})</h2>
+      <p class="small" style="margin-bottom:14px;">Shortlist entries and assign a pseudonym to show them anonymously on the Vote page.</p>
+      <table class="admin-t">
+        <thead><tr><th></th><th>Rep</th><th>Write-up</th><th>Shortlisted</th><th>Pseudonym</th><th>Votes</th><th></th></tr></thead>
+        <tbody>
+          ${entries.map(e=>`
+            <tr data-id="${e.id}">
+              <td><img class="thumb" src="${e.image}"></td>
+              <td>${escapeHtml(e.name)}<br><span class="small">${escapeHtml(e.email)}</span></td>
+              <td style="max-width:220px;">${escapeHtml(e.writeup)}</td>
+              <td><span class="pill ${e.shortlisted?'on':'off'}">${e.shortlisted?'Shortlisted':'Not yet'}</span></td>
+              <td><input type="text" class="pn-input" data-id="${e.id}" value="${escapeHtml(e.pseudonym||suggestPseudonym(e.id))}" style="margin:0;padding:6px 8px;font-size:0.8rem;"></td>
+              <td>${voteCounts[e.id]||0}</td>
+              <td><button class="ghost toggle-sl" data-id="${e.id}">${e.shortlisted?'Remove':'Shortlist'}</button></td>
+            </tr>
+          `).join('')}
+          ${entries.length===0 ? '<tr><td colspan="7" class="empty">No submissions yet.</td></tr>' : ''}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.querySelectorAll('.phase-btns button').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.phase === phase);
+    if(btn.dataset.phase === phase){ btn.style.borderColor='var(--amber)'; btn.style.color='var(--cream)'; }
+    btn.onclick = async ()=>{
+      phase = btn.dataset.phase;
+      await storageSet('phase', phase);
+      renderBanner();
+      loadAdminPanel();
+    };
+  });
+
+  document.querySelectorAll('.toggle-sl').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.id;
+      const entry = entries.find(e=>e.id===id);
+      const pnInput = document.querySelector(`.pn-input[data-id="${id}"]`);
+      entry.shortlisted = !entry.shortlisted;
+      entry.pseudonym = pnInput.value.trim() || suggestPseudonym(id);
+      await storageSet('submissions:'+id, JSON.stringify(entry));
+      loadAdminPanel();
+    };
+  });
+
+  document.querySelectorAll('.pn-input').forEach(inp=>{
+    inp.onchange = async ()=>{
+      const id = inp.dataset.id;
+      const entry = entries.find(e=>e.id===id);
+      entry.pseudonym = inp.value.trim() || suggestPseudonym(id);
+      await storageSet('submissions:'+id, JSON.stringify(entry));
+    };
+  });
+}
+
+// ---------- INIT ----------
+(async function init(){
+  await loadPhase();
+  renderSubmit();
+})();
+</script>
+</body>
+</html>
