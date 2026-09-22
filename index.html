@@ -198,15 +198,11 @@
 
   <nav class="tabs">
     <button id="tab-submit" class="active">Submit Entry</button>
-    <button id="tab-vote">Vote</button>
-    <button id="tab-admin">Admin</button>
   </nav>
 
   <div id="banner" class="banner"><span class="dot"></span><span id="banner-text">Loading status…</span></div>
 
   <div id="view-submit"></div>
-  <div id="view-vote" style="display:none;"></div>
-  <div id="view-admin" style="display:none;"></div>
 
   <p class="footer-note">“What Does Mid-Autumn Mean to You?” · Submission deadline 20 Sep 2026</p>
 </div>
@@ -214,8 +210,8 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
 // ====== SUPABASE SETUP — replace with your own project's values ======
-const SUPABASE_URL = 'https://safvusphqqivcfhadnkf.supabase.co/rest/v1/';
-const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+const SUPABASE_URL = 'https://safvusphqqivcfhadnkf.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable__DnP3n02cpBrqX2dT1m4nA_GGG0SXaI';
 // ========================================================================
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -238,11 +234,8 @@ async function storageList(prefix){
 </script>
 <script>
 const DEADLINE = new Date('2026-09-20T23:59:59+08:00');
-const ADMIN_PASSCODE = 'MIDAUTUMN2026'; // share only with contest organisers
 
 let phase = 'submission'; // submission | voting | results
-let adminAuthed = false;
-let voterIdentity = null; // {name, email} kept in memory only for this session
 
 const el = (id) => document.getElementById(id);
 
@@ -282,17 +275,13 @@ function renderBanner(){
 
 // ---------- TABS ----------
 function setTab(name){
-  ['submit','vote','admin'].forEach(n=>{
+  ['submit'].forEach(n=>{
     el('tab-'+n).classList.toggle('active', n===name);
     el('view-'+n).style.display = n===name ? '' : 'none';
   });
   if(name==='submit') renderSubmit();
-  if(name==='vote') renderVote();
-  if(name==='admin') renderAdmin();
 }
 el('tab-submit').onclick = ()=>setTab('submit');
-el('tab-vote').onclick = ()=>setTab('vote');
-el('tab-admin').onclick = ()=>setTab('admin');
 
 // ---------- SUBMIT VIEW ----------
 function renderSubmit(){
@@ -308,7 +297,7 @@ function renderSubmit(){
       <div id="submit-msg" class="msg"></div>
       <label for="s-name">Rep full name</label>
       <input type="text" id="s-name" placeholder="e.g. Tan Wei Ling">
-      <label for="s-email">Corporate email</label>
+      <label for="s-email">Phillip email</label>
       <input type="email" id="s-email" placeholder="name@phillip.com.sg">
       <label for="s-write">Short write-up — what does Mid-Autumn mean to you? (max 50 words)</label>
       <textarea id="s-write" placeholder="Tell us the story behind your lantern…"></textarea>
@@ -401,289 +390,11 @@ function showMsg(node, kind, text){
   node.style.display = 'block';
 }
 
-// ---------- VOTE VIEW ----------
-async function fetchShortlisted(){
-  const list = await storageList('submissions:');
-  if(!list || !list.keys) return [];
-  const entries = [];
-  for(const k of list.keys){
-    try{
-      const r = await storageGet(k);
-      if(r && r.value){
-        const obj = JSON.parse(r.value);
-        if(obj.shortlisted) entries.push(obj);
-      }
-    }catch(e){}
-  }
-  return entries;
-}
-
-async function fetchAllSubmissions(){
-  const list = await storageList('submissions:');
-  if(!list || !list.keys) return [];
-  const entries = [];
-  for(const k of list.keys){
-    try{
-      const r = await storageGet(k);
-      if(r && r.value) entries.push(JSON.parse(r.value));
-    }catch(e){}
-  }
-  return entries;
-}
-
-async function fetchVotes(){
-  const list = await storageList('votes:');
-  if(!list || !list.keys) return [];
-  const votes = [];
-  for(const k of list.keys){
-    try{
-      const r = await storageGet(k);
-      if(r && r.value) votes.push(JSON.parse(r.value));
-    }catch(e){}
-  }
-  return votes;
-}
-
-async function renderVote(){
-  const v = el('view-vote');
-  if(phase === 'submission'){
-    v.innerHTML = `<div class="card"><p class="empty">Voting isn't open yet — check back during the event! 🏮</p></div>`;
-    return;
-  }
-  v.innerHTML = `<div class="card"><p class="empty">Loading lanterns…</p></div>`;
-  const entries = await fetchShortlisted();
-
-  if(phase === 'results'){
-    const votes = await fetchVotes();
-    const counts = {};
-    entries.forEach(e=>counts[e.id]=0);
-    votes.forEach(vt=>{ if(counts[vt.entryId] !== undefined) counts[vt.entryId]++; });
-    const ranked = entries.map(e=>({...e,count:counts[e.id]||0})).sort((a,b)=>b.count-a.count);
-    const max = Math.max(1, ...ranked.map(r=>r.count));
-    v.innerHTML = `
-      <div class="card">
-        <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;">Results 🏮</h2>
-        ${ranked.map(r=>`
-          <div class="results-row">
-            <div class="rname">${escapeHtml(r.pseudonym||'Unnamed')}</div>
-            <div class="barwrap"><div class="bar" style="width:${(r.count/max*100).toFixed(1)}%"></div></div>
-            <div class="rcount">${r.count}</div>
-          </div>
-        `).join('')}
-        ${ranked.length===0 ? '<p class="empty">No shortlisted entries yet.</p>' : ''}
-      </div>
-      <div class="gallery">
-        ${entries.map(e=>`
-          <div class="lantern">
-            <img src="${e.image}" alt="${escapeHtml(e.pseudonym||'Lantern entry')}">
-            <div class="body">
-              <div class="name">${escapeHtml(e.pseudonym||'Unnamed')}</div>
-              <div class="writeup">${escapeHtml(e.writeup)}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    return;
-  }
-
-  // voting phase — need voter identity first
-  if(!voterIdentity){
-    v.innerHTML = `
-      <div class="card voter-gate">
-        <p class="small" style="margin-bottom:18px;">Enter your name and email so we can make sure each person votes once. Your vote stays anonymous to other reps.</p>
-        <div id="vote-gate-msg" class="msg"></div>
-        <label for="v-name">Your name</label>
-        <input type="text" id="v-name" placeholder="e.g. Tan Wei Ling">
-        <label for="v-email">Your Corporate email</label>
-        <input type="email" id="v-email" placeholder="name@phillip.com.sg">
-        <button class="primary" id="v-continue">Continue to Voting</button>
-      </div>
-    `;
-    el('v-continue').onclick = ()=>{
-      const name = el('v-name').value.trim();
-      const email = el('v-email').value.trim();
-      const msg = el('vote-gate-msg');
-      if(!name || !email || !/^\S+@\S+\.\S+$/.test(email)){
-        showMsg(msg,'err','Please enter your name and a valid email.');
-        return;
-      }
-      voterIdentity = {name, email};
-      renderVote();
-    };
-    return;
-  }
-
-  const voterKey = normKey(voterIdentity.email);
-  let existingVote = null;
-  try{
-    const r = await storageGet('votes:'+voterKey);
-    if(r && r.value) existingVote = JSON.parse(r.value);
-  }catch(e){}
-
-  if(entries.length === 0){
-    v.innerHTML = `<div class="card"><p class="empty">No lanterns have been shortlisted for voting yet.</p></div>`;
-    return;
-  }
-
-  v.innerHTML = `
-    <div id="vote-msg" class="msg"></div>
-    <div class="gallery">
-      ${entries.map(e=>`
-        <div class="lantern">
-          <img src="${e.image}" alt="${escapeHtml(e.pseudonym||'Lantern entry')}">
-          <div class="body">
-            <div class="name">${escapeHtml(e.pseudonym||'Unnamed')}</div>
-            <div class="writeup">${escapeHtml(e.writeup)}</div>
-            ${existingVote
-              ? (existingVote.entryId === e.id
-                  ? `<div class="voted">✓ Your vote</div>`
-                  : `<button class="ghost" disabled>Vote cast</button>`)
-              : `<button class="primary vote-btn" data-id="${e.id}">Vote for this lantern</button>`
-            }
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-
-  if(!existingVote){
-    document.querySelectorAll('.vote-btn').forEach(btn=>{
-      btn.onclick = async ()=>{
-        document.querySelectorAll('.vote-btn').forEach(b=>b.disabled = true);
-        const msg = el('vote-msg');
-        try{
-          const res = await storageSet('votes:'+voterKey, JSON.stringify({
-            voterKey, voterName: voterIdentity.name, entryId: btn.dataset.id, timestamp: new Date().toISOString()
-          }));
-          if(res){
-            showMsg(msg,'ok','Your vote has been recorded — thank you!');
-            renderVote();
-          } else {
-            showMsg(msg,'err','Could not record your vote. Please try again.');
-            document.querySelectorAll('.vote-btn').forEach(b=>b.disabled = false);
-          }
-        }catch(e){
-          showMsg(msg,'err','Could not record your vote. Please try again.');
-          document.querySelectorAll('.vote-btn').forEach(b=>b.disabled = false);
-        }
-      };
-    });
-  }
-}
-
-// ---------- ADMIN VIEW ----------
-const PSEUDONYM_ADJ = ['Amber','Jade','Silver','Crimson','Golden','Velvet','Twilight','Dawnlit','Moonlit','Ember'];
-const PSEUDONYM_NOUN = ['Lantern','Moonbeam','Harvest','Osmanthus','Mooncake','Rabbit','Lotus','Breeze','Reunion','Glow'];
-function suggestPseudonym(id){
-  let h = 0;
-  for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) >>> 0;
-  return PSEUDONYM_ADJ[h % PSEUDONYM_ADJ.length] + ' ' + PSEUDONYM_NOUN[(h>>3) % PSEUDONYM_NOUN.length];
-}
-
+// ---------- HELPERS ----------
 function escapeHtml(str){
   const d = document.createElement('div');
   d.textContent = str || '';
   return d.innerHTML;
-}
-
-function renderAdmin(){
-  const v = el('view-admin');
-  if(!adminAuthed){
-    v.innerHTML = `
-      <div class="card voter-gate">
-        <label for="a-pass">Admin passcode</label>
-        <input type="text" id="a-pass" placeholder="Enter passcode">
-        <div id="a-msg" class="msg"></div>
-        <button class="primary" id="a-login">Enter</button>
-      </div>
-    `;
-    el('a-login').onclick = ()=>{
-      if(el('a-pass').value === ADMIN_PASSCODE){
-        adminAuthed = true;
-        renderAdmin();
-      } else {
-        showMsg(el('a-msg'),'err','Incorrect passcode.');
-      }
-    };
-    return;
-  }
-
-  v.innerHTML = `<div class="card"><p class="empty">Loading submissions…</p></div>`;
-  loadAdminPanel();
-}
-
-async function loadAdminPanel(){
-  const v = el('view-admin');
-  const [entries, votes] = await Promise.all([fetchAllSubmissions(), fetchVotes()]);
-  const voteCounts = {};
-  votes.forEach(vt=>{ voteCounts[vt.entryId] = (voteCounts[vt.entryId]||0) + 1; });
-
-  v.innerHTML = `
-    <div class="card">
-      <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;font-size:1.1rem;">Event phase</h2>
-      <p class="small">Controls what reps see across the site.</p>
-      <div class="phase-btns">
-        <button class="ghost" data-phase="submission">Submission Open</button>
-        <button class="ghost" data-phase="voting">Voting Open</button>
-        <button class="ghost" data-phase="results">Show Results</button>
-      </div>
-      <p class="small">Current phase: <strong>${phase}</strong></p>
-    </div>
-    <div class="card">
-      <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;font-size:1.1rem;">Submissions (${entries.length})</h2>
-      <p class="small" style="margin-bottom:14px;">Shortlist entries and assign a pseudonym to show them anonymously on the Vote page.</p>
-      <table class="admin-t">
-        <thead><tr><th></th><th>Rep</th><th>Write-up</th><th>Shortlisted</th><th>Pseudonym</th><th>Votes</th><th></th></tr></thead>
-        <tbody>
-          ${entries.map(e=>`
-            <tr data-id="${e.id}">
-              <td><img class="thumb" src="${e.image}"></td>
-              <td>${escapeHtml(e.name)}<br><span class="small">${escapeHtml(e.email)}</span></td>
-              <td style="max-width:220px;">${escapeHtml(e.writeup)}</td>
-              <td><span class="pill ${e.shortlisted?'on':'off'}">${e.shortlisted?'Shortlisted':'Not yet'}</span></td>
-              <td><input type="text" class="pn-input" data-id="${e.id}" value="${escapeHtml(e.pseudonym||suggestPseudonym(e.id))}" style="margin:0;padding:6px 8px;font-size:0.8rem;"></td>
-              <td>${voteCounts[e.id]||0}</td>
-              <td><button class="ghost toggle-sl" data-id="${e.id}">${e.shortlisted?'Remove':'Shortlist'}</button></td>
-            </tr>
-          `).join('')}
-          ${entries.length===0 ? '<tr><td colspan="7" class="empty">No submissions yet.</td></tr>' : ''}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  document.querySelectorAll('.phase-btns button').forEach(btn=>{
-    btn.classList.toggle('active', btn.dataset.phase === phase);
-    if(btn.dataset.phase === phase){ btn.style.borderColor='var(--amber)'; btn.style.color='var(--cream)'; }
-    btn.onclick = async ()=>{
-      phase = btn.dataset.phase;
-      await storageSet('phase', phase);
-      renderBanner();
-      loadAdminPanel();
-    };
-  });
-
-  document.querySelectorAll('.toggle-sl').forEach(btn=>{
-    btn.onclick = async ()=>{
-      const id = btn.dataset.id;
-      const entry = entries.find(e=>e.id===id);
-      const pnInput = document.querySelector(`.pn-input[data-id="${id}"]`);
-      entry.shortlisted = !entry.shortlisted;
-      entry.pseudonym = pnInput.value.trim() || suggestPseudonym(id);
-      await storageSet('submissions:'+id, JSON.stringify(entry));
-      loadAdminPanel();
-    };
-  });
-
-  document.querySelectorAll('.pn-input').forEach(inp=>{
-    inp.onchange = async ()=>{
-      const id = inp.dataset.id;
-      const entry = entries.find(e=>e.id===id);
-      entry.pseudonym = inp.value.trim() || suggestPseudonym(id);
-      await storageSet('submissions:'+id, JSON.stringify(entry));
-    };
-  });
 }
 
 // ---------- INIT ----------
