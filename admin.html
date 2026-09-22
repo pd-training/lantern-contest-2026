@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lantern Contest — Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1440;
+    --ink-deep:#070C2C;
+    --card:#141C4E;
+    --card-line:#30397A;
+    --amber:#F5C542;
+    --persimmon:#FF9D4D;
+    --cream:#F6EFDD;
+    --cream-dim:#B9C0E8;
+    --jade:#5B9083;
+    --danger:#FF7A5C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle 260px at 82% 10%, rgba(245,197,66,0.28), transparent 70%),
+      radial-gradient(1.5px 1.5px at 12% 18%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 27% 42%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 41% 12%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 63% 30%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 78% 55%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 92% 20%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 8% 70%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 55% 80%, #fff 100%, transparent),
+      radial-gradient(1px 1px at 35% 90%, #fff 100%, transparent), radial-gradient(1.5px 1.5px at 88% 85%, #fff 100%, transparent),
+      linear-gradient(180deg, var(--ink-deep), var(--ink) 55%, var(--ink-deep));
+    background-attachment:fixed;
+    color:var(--cream);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px;position:relative;z-index:1;}
+  .lantern-field{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+  .floating-lantern{position:absolute;bottom:-140px;width:30px;animation:lanternRise linear infinite;}
+  .floating-lantern::before{
+    content:'';position:absolute;left:50%;top:-16px;width:1px;height:16px;
+    background:rgba(246,239,221,0.35);transform:translateX(-50%);
+  }
+  .floating-lantern .cap{width:100%;height:6px;background:#5A3E16;border-radius:3px 3px 1px 1px;}
+  .floating-lantern .body{
+    width:100%;height:34px;border-radius:15px;margin-top:-1px;
+    background:radial-gradient(circle at 32% 28%, #FFEFC2, var(--amber) 55%, var(--persimmon) 100%);
+    box-shadow:0 0 16px 4px rgba(245,197,66,0.5), inset -3px 0 6px rgba(0,0,0,0.15);
+    position:relative;
+  }
+  .floating-lantern .body::after{
+    content:'';position:absolute;top:0;bottom:0;left:47%;width:1px;background:rgba(90,62,22,0.35);
+  }
+  .floating-lantern .base{width:100%;height:5px;background:#5A3E16;border-radius:1px 1px 3px 3px;}
+  .floating-lantern .tassel{width:2px;height:12px;background:#B97423;margin:0 auto;}
+  @keyframes lanternRise{
+    0%{transform:translateY(0) rotate(-2deg);opacity:0;}
+    8%{opacity:0.85;}
+    50%{transform:translateY(-52vh) rotate(2deg);}
+    92%{opacity:0.85;}
+    100%{transform:translateY(-108vh) rotate(-2deg);opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .floating-lantern{animation:none;display:none;}
+  }
+  header.top{
+    display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;
+    gap:14px;margin-bottom:8px;padding:38px 20px 34px;position:relative;overflow:hidden;
+    border-radius:20px;border:1px solid var(--card-line);
+    background:radial-gradient(circle 320px at 50% -30%, rgba(245,197,66,0.22), transparent 70%), var(--card);
+  }
+  .brand{display:flex;align-items:center;gap:14px;flex-direction:column;}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;background:var(--cream);color:var(--ink-deep);
+    padding:8px 18px;border-radius:999px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:0.95rem;
+  }
+  .moon{
+    width:72px;height:72px;border-radius:50%;flex-shrink:0;
+    background:radial-gradient(circle at 35% 30%, #FFFCF2, var(--amber) 55%, #C98A1F 100%);
+    box-shadow:0 0 50px 10px rgba(245,197,66,0.45);
+    margin-top:2px;
+  }
+  h1{
+    font-family:'Fredoka',sans-serif;font-weight:700;font-size:2.6rem;margin:4px 0 0;letter-spacing:0.5px;
+    color:var(--amber);text-shadow:0 3px 0 rgba(0,0,0,0.35);line-height:1;
+  }
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-dim);margin:0 0 2px;}
+  nav.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:28px 0 26px;}
+  nav.tabs button{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:0.9rem;
+    background:transparent;border:1.5px solid var(--card-line);color:var(--cream-dim);
+    padding:9px 18px;border-radius:999px;cursor:pointer;transition:all .18s ease;
+  }
+  nav.tabs button:hover{border-color:var(--amber);color:var(--cream);}
+  nav.tabs button.active{background:var(--amber);border-color:var(--amber);color:var(--ink-deep);font-weight:700;}
+  .banner{
+    border:1px solid var(--card-line);background:var(--card);border-radius:12px;
+    padding:14px 18px;font-size:0.88rem;color:var(--cream-dim);margin-bottom:26px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .banner .dot{width:8px;height:8px;border-radius:50%;background:var(--jade);flex-shrink:0;box-shadow:0 0 8px var(--jade);}
+  .banner.warn .dot{background:var(--persimmon);box-shadow:0 0 8px var(--persimmon);}
+  .card{background:var(--card);border:1px solid var(--card-line);border-radius:16px;padding:28px;margin-bottom:22px;}
+  label{display:block;font-size:0.82rem;color:var(--cream-dim);margin:0 0 6px;font-weight:500;}
+  input[type=text], input[type=email], textarea{
+    width:100%;background:var(--ink-deep);border:1px solid var(--card-line);border-radius:9px;
+    color:var(--cream);padding:11px 13px;font-family:'Work Sans',sans-serif;font-size:0.94rem;
+    margin-bottom:18px;transition:border-color .15s;
+  }
+  input:focus, textarea:focus{outline:none;border-color:var(--amber);}
+  textarea{resize:vertical;min-height:90px;}
+  .counter{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--cream-dim);margin:-12px 0 18px;text-align:right;}
+  .counter.over{color:var(--danger);}
+  .filebox{
+    border:1.5px dashed var(--card-line);border-radius:10px;padding:20px;text-align:center;
+    margin-bottom:18px;cursor:pointer;transition:border-color .15s;position:relative;
+  }
+  .filebox:hover{border-color:var(--amber);}
+  .filebox input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+  .filebox .hint{font-size:0.8rem;color:var(--cream-dim);}
+  .preview{max-width:100%;max-height:220px;border-radius:8px;margin-top:12px;display:none;}
+  button.primary{
+    background:linear-gradient(135deg,var(--amber),var(--persimmon));border:none;color:var(--ink-deep);
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:0.94rem;padding:12px 26px;border-radius:999px;cursor:pointer;transition:filter .15s;
+  }
+  button.primary:hover{filter:brightness(1.08);}
+  button.primary:disabled{opacity:0.45;cursor:not-allowed;}
+  button.ghost{background:transparent;border:1px solid var(--card-line);color:var(--cream-dim);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:0.82rem;}
+  button.ghost:hover{border-color:var(--amber);color:var(--cream);}
+  .msg{padding:12px 16px;border-radius:9px;font-size:0.86rem;margin-bottom:16px;display:none;}
+  .msg.ok{background:rgba(91,144,131,0.18);border:1px solid var(--jade);color:#BFE3D8;}
+  .msg.err{background:rgba(217,104,60,0.18);border:1px solid var(--persimmon);color:#F4C9B4;}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
+  .lantern{
+    background:var(--card);border:1px solid var(--card-line);border-radius:14px;overflow:hidden;
+    display:flex;flex-direction:column;transition:transform .15s, border-color .15s;
+  }
+  .lantern:hover{border-color:var(--amber);transform:translateY(-2px);}
+  .lantern img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+  .lantern .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .lantern .name{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--amber);font-size:1.02rem;}
+  .lantern .writeup{font-size:0.82rem;color:var(--cream-dim);line-height:1.45;flex:1;}
+  .lantern .voted{font-size:0.78rem;color:var(--jade);font-weight:600;}
+  .voter-gate{max-width:420px;}
+  .results-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+  .results-row .rname{width:150px;flex-shrink:0;font-size:0.85rem;font-family:'Fredoka',sans-serif;color:var(--cream);}
+  .results-row .barwrap{flex:1;background:var(--ink-deep);border-radius:999px;height:16px;overflow:hidden;border:1px solid var(--card-line);}
+  .results-row .bar{height:100%;background:linear-gradient(90deg,var(--persimmon),var(--amber));box-shadow:0 0 10px rgba(232,163,61,0.5);}
+  .results-row .rcount{width:34px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--cream-dim);}
+  table.admin-t{width:100%;border-collapse:collapse;font-size:0.82rem;}
+  table.admin-t th{text-align:left;color:var(--cream-dim);font-weight:500;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;padding:8px 10px;border-bottom:1px solid var(--card-line);}
+  table.admin-t td{padding:9px 10px;border-bottom:1px solid var(--card-line);vertical-align:middle;}
+  table.admin-t img.thumb{width:42px;height:42px;object-fit:cover;border-radius:6px;cursor:pointer;transition:transform .15s;}
+  table.admin-t img.thumb:hover{transform:scale(1.15);outline:2px solid var(--amber);}
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(7,12,44,0.85);z-index:50;
+    align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(2px);
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--card);border:1px solid var(--card-line);border-radius:16px;padding:20px;
+    max-width:min(90vw,560px);max-height:90vh;overflow:auto;position:relative;
+  }
+  .modal-box img{width:100%;border-radius:10px;display:block;margin-bottom:14px;}
+  .modal-close{
+    position:absolute;top:12px;right:12px;background:var(--ink-deep);border:1px solid var(--card-line);
+    color:var(--cream);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.9rem;line-height:1;
+  }
+  .modal-close:hover{border-color:var(--amber);}
+  .modal-meta{font-size:0.82rem;color:var(--cream-dim);margin-bottom:14px;}
+  .modal-meta strong{color:var(--cream);}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.7rem;font-weight:600;}
+  .pill.on{background:rgba(91,144,131,0.22);color:#BFE3D8;}
+  .pill.off{background:rgba(255,255,255,0.06);color:var(--cream-dim);}
+  .phase-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+  .empty{text-align:center;padding:40px 20px;color:var(--cream-dim);font-size:0.9rem;}
+  .small{font-size:0.76rem;color:var(--cream-dim);}
+  .footer-note{text-align:center;font-size:0.72rem;color:var(--cream-dim);opacity:0.6;margin-top:40px;}
+  ::placeholder{color:#5C6690;}
+</style>
+</head>
+<body>
+<div class="wrap" style="max-width:1080px;">
+  <header class="top" style="padding:26px 20px;">
+    <div class="brand">
+      <div class="moon" style="width:48px;height:48px;"></div>
+      <span class="badge">🔒 Organiser Access</span>
+      <h1 style="font-size:1.7rem;">Lantern Contest Admin</h1>
+      <p class="eyebrow">Not linked from the public site — bookmark this page</p>
+    </div>
+  </header>
+
+  <div id="view-admin"></div>
+</div>
+
+<div class="modal-overlay" id="photo-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-close">✕</button>
+    <img id="modal-img" src="" alt="Submitted lantern artwork">
+    <div class="modal-meta" id="modal-meta"></div>
+    <button class="primary" id="modal-download">Download image</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+// ====== SUPABASE SETUP — same project as the public site ======
+const SUPABASE_URL = 'https://safvusphqqivcfhadnkf.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable__DnP3n02cpBrqX2dT1m4nA_GGG0SXaI';
+// ================================================================
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function storageGet(key){
+  const { data, error } = await sb.from('kv_store').select('value').eq('key', key).maybeSingle();
+  if(error || !data) return null;
+  return { key, value: data.value };
+}
+async function storageSet(key, value){
+  const { error } = await sb.from('kv_store').upsert({ key, value, updated_at: new Date().toISOString() });
+  return error ? null : { key, value };
+}
+async function storageList(prefix){
+  const { data, error } = await sb.from('kv_store').select('key').like('key', prefix + '%');
+  if(error) return null;
+  return { keys: (data || []).map(r => r.key) };
+}
+</script>
+<script>
+const ADMIN_PASSCODE = 'MIDAUTUMN2026'; // change this, then bookmark this page privately
+let adminAuthed = false;
+let phase = 'submission';
+
+const el = (id) => document.getElementById(id);
+
+function showMsg(node, kind, text){
+  node.className = 'msg ' + kind;
+  node.textContent = text;
+  node.style.display = 'block';
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+async function fetchAllSubmissions(){
+  const list = await storageList('submissions:');
+  if(!list || !list.keys) return [];
+  const entries = [];
+  for(const k of list.keys){
+    try{
+      const r = await storageGet(k);
+      if(r && r.value) entries.push(JSON.parse(r.value));
+    }catch(e){}
+  }
+  return entries;
+}
+
+async function fetchVotes(){
+  const list = await storageList('votes:');
+  if(!list || !list.keys) return [];
+  const votes = [];
+  for(const k of list.keys){
+    try{
+      const r = await storageGet(k);
+      if(r && r.value) votes.push(JSON.parse(r.value));
+    }catch(e){}
+  }
+  return votes;
+}
+
+const PSEUDONYM_ADJ = ['Amber','Jade','Silver','Crimson','Golden','Velvet','Twilight','Dawnlit','Moonlit','Ember'];
+const PSEUDONYM_NOUN = ['Lantern','Moonbeam','Harvest','Osmanthus','Mooncake','Rabbit','Lotus','Breeze','Reunion','Glow'];
+function suggestPseudonym(id){
+  let h = 0;
+  for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) >>> 0;
+  return PSEUDONYM_ADJ[h % PSEUDONYM_ADJ.length] + ' ' + PSEUDONYM_NOUN[(h>>3) % PSEUDONYM_NOUN.length];
+}
+
+function extFromDataUrl(dataUrl){
+  const m = /^data:image\/(jpeg|jpg|png)/.exec(dataUrl || '');
+  return m ? (m[1] === 'jpeg' ? 'jpg' : m[1]) : 'jpg';
+}
+
+function openPhotoModal(entry){
+  el('modal-img').src = entry.image;
+  el('modal-meta').innerHTML = `<strong>${escapeHtml(entry.name)}</strong><br>${escapeHtml(entry.email)}`;
+  const safeName = (entry.name || 'entry').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  el('modal-download').onclick = ()=>{
+    const a = document.createElement('a');
+    a.href = entry.image;
+    a.download = `lantern-${safeName || 'entry'}.${extFromDataUrl(entry.image)}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+  el('photo-modal').classList.add('open');
+}
+el('modal-close').onclick = ()=> el('photo-modal').classList.remove('open');
+el('photo-modal').addEventListener('click', (e)=>{ if(e.target.id === 'photo-modal') el('photo-modal').classList.remove('open'); });
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') el('photo-modal').classList.remove('open'); });
+
+function renderAdmin(){
+  const v = el('view-admin');
+  if(!adminAuthed){
+    v.innerHTML = `
+      <div class="card voter-gate">
+        <label for="a-pass">Admin passcode</label>
+        <input type="text" id="a-pass" placeholder="Enter passcode">
+        <div id="a-msg" class="msg"></div>
+        <button class="primary" id="a-login">Enter</button>
+      </div>
+    `;
+    el('a-pass').addEventListener('keydown', (e)=>{ if(e.key==='Enter') el('a-login').click(); });
+    el('a-login').onclick = ()=>{
+      if(el('a-pass').value === ADMIN_PASSCODE){
+        adminAuthed = true;
+        renderAdmin();
+      } else {
+        showMsg(el('a-msg'),'err','Incorrect passcode.');
+      }
+    };
+    return;
+  }
+  v.innerHTML = `<div class="card"><p class="empty">Loading submissions…</p></div>`;
+  loadAdminPanel();
+}
+
+async function loadAdminPanel(){
+  const v = el('view-admin');
+  const [entries, votes, phaseRes] = await Promise.all([fetchAllSubmissions(), fetchVotes(), storageGet('phase')]);
+  phase = phaseRes ? phaseRes.value : 'submission';
+  const voteCounts = {};
+  votes.forEach(vt=>{ voteCounts[vt.entryId] = (voteCounts[vt.entryId]||0) + 1; });
+
+  v.innerHTML = `
+    <div class="card">
+      <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;font-size:1.1rem;">Event phase</h2>
+      <p class="small">Controls what reps see on the public site.</p>
+      <div class="phase-btns">
+        <button class="ghost" data-phase="submission">Submission Open</button>
+        <button class="ghost" data-phase="voting">Voting Open</button>
+        <button class="ghost" data-phase="results">Show Results</button>
+      </div>
+      <p class="small">Current phase: <strong>${phase}</strong></p>
+    </div>
+    <div class="card">
+      <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;font-size:1.1rem;">Voting page link &amp; QR</h2>
+      <p class="small" style="margin-bottom:14px;">This is a separate page — it only ever shows the voting gallery (or results), never the submission form or this admin panel. Safe to project or print as a QR code on event day.</p>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+        <img id="qr-img" src="" alt="QR code linking to the voting page" style="width:160px;height:160px;border-radius:10px;background:#fff;padding:8px;">
+        <div style="flex:1;min-width:220px;">
+          <input type="text" id="vote-url" readonly style="margin-bottom:10px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="ghost" id="copy-vote-url">Copy link</button>
+            <button class="ghost" id="open-vote-url">Open page</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="font-family:'Fredoka',sans-serif;margin-top:0;font-size:1.1rem;">Submissions (${entries.length})</h2>
+      <p class="small" style="margin-bottom:14px;">Shortlist entries and assign a pseudonym to show them anonymously on the Vote page.</p>
+      <table class="admin-t">
+        <thead><tr><th></th><th>Rep</th><th>Write-up</th><th>Shortlisted</th><th>Pseudonym</th><th>Votes</th><th></th></tr></thead>
+        <tbody>
+          ${entries.map(e=>`
+            <tr data-id="${e.id}">
+              <td><img class="thumb" data-id="${e.id}" src="${e.image}"></td>
+              <td>${escapeHtml(e.name)}<br><span class="small">${escapeHtml(e.email)}</span></td>
+              <td style="max-width:220px;">${escapeHtml(e.writeup)}</td>
+              <td><span class="pill ${e.shortlisted?'on':'off'}">${e.shortlisted?'Shortlisted':'Not yet'}</span></td>
+              <td><input type="text" class="pn-input" data-id="${e.id}" value="${escapeHtml(e.pseudonym||suggestPseudonym(e.id))}" style="margin:0;padding:6px 8px;font-size:0.8rem;"></td>
+              <td>${voteCounts[e.id]||0}</td>
+              <td><button class="ghost toggle-sl" data-id="${e.id}">${e.shortlisted?'Remove':'Shortlist'}</button></td>
+            </tr>
+          `).join('')}
+          ${entries.length===0 ? '<tr><td colspan="7" class="empty">No submissions yet.</td></tr>' : ''}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.querySelectorAll('.thumb').forEach(img=>{
+    img.onclick = ()=>{
+      const entry = entries.find(e=>e.id === img.dataset.id);
+      if(entry) openPhotoModal(entry);
+    };
+  });
+
+  const voteUrl = window.location.origin + '/vote.html';
+  el('vote-url').value = voteUrl;
+  el('qr-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(voteUrl);
+  el('copy-vote-url').onclick = async ()=>{
+    try{
+      await navigator.clipboard.writeText(voteUrl);
+      el('copy-vote-url').textContent = 'Copied!';
+      setTimeout(()=>{ el('copy-vote-url').textContent = 'Copy link'; }, 1600);
+    }catch(e){
+      el('vote-url').select();
+    }
+  };
+  el('open-vote-url').onclick = ()=> window.open(voteUrl, '_blank');
+
+  document.querySelectorAll('.phase-btns button').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.phase === phase);
+    if(btn.dataset.phase === phase){ btn.style.borderColor='var(--amber)'; btn.style.color='var(--cream)'; }
+    btn.onclick = async ()=>{
+      phase = btn.dataset.phase;
+      await storageSet('phase', phase);
+      loadAdminPanel();
+    };
+  });
+
+  document.querySelectorAll('.toggle-sl').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.id;
+      const entry = entries.find(e=>e.id===id);
+      const pnInput = document.querySelector(`.pn-input[data-id="${id}"]`);
+      entry.shortlisted = !entry.shortlisted;
+      entry.pseudonym = pnInput.value.trim() || suggestPseudonym(id);
+      await storageSet('submissions:'+id, JSON.stringify(entry));
+      loadAdminPanel();
+    };
+  });
+
+  document.querySelectorAll('.pn-input').forEach(inp=>{
+    inp.onchange = async ()=>{
+      const id = inp.dataset.id;
+      const entry = entries.find(e=>e.id===id);
+      entry.pseudonym = inp.value.trim() || suggestPseudonym(id);
+      await storageSet('submissions:'+id, JSON.stringify(entry));
+    };
+  });
+}
+
+renderAdmin();
+</script>
+</body>
+</html>
